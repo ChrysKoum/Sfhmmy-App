@@ -6,14 +6,12 @@ import {
   Switch, 
   ScrollView, 
   ActivityIndicator,
-  TextInput,
   Alert,
-  View as RNView
+  View as RNView,
+  Linking,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link } from 'expo-router';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -22,27 +20,23 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/hooks/useAuth';
 
+// API URL - Update with your actual Laravel API URL
+const API_URL = 'http://192.168.1.4:8000/api';
+
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
   const [isQRCodeVisible, setIsQRCodeVisible] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(colorScheme === 'dark');
   const { user, token, signOut, isLoading, refreshUserProfile } = useAuth();
-  const [qrCodeData, setQrCodeData] = useState("");
-  
-  // Personal Information Edit States
-  const [editField, setEditField] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
   
   // CV States
   const [cvUploaded, setCvUploaded] = useState(false);
   const [cvFileName, setCvFileName] = useState("No CV uploaded");
-  const [isUploadingCV, setIsUploadingCV] = useState(false);
+  const [cvUrl, setCvUrl] = useState<string | null>(null);
+  const [isCvLoading, setIsCvLoading] = useState(false);
   
-  // Workshop States
-  const [isEditingWorkshops, setIsEditingWorkshops] = useState(false);
-  
-  // Mock workshop data - in a real app, this would come from your API
+  // Workshop States - In a real app, this would come from your API
   const [workshops, setWorkshops] = useState([
     "Introduction to Machine Learning", 
     "Web3 Development",
@@ -55,17 +49,89 @@ export default function ProfileScreen() {
       refreshUserProfile();
     }
   }, []);
-  console.log("User data:", user);
+
+  // Fetch CV data when component mounts
+  useEffect(() => {
+    fetchCV();
+  }, [user]);
+
+  const fetchCV = async () => {
+    if (!token) return;
+    
+    setIsCvLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/cv`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      });
+      
+      const result = await response.json();
+      console.log("CV result:", result);
+      
+      if (result && typeof result === 'object' && result.exists === true) {
+        // CV exists and we got back valid data
+        setCvUrl(result.url);
+        setCvFileName(result.filename || "My CV");
+        setCvUploaded(true);
+      } else {
+        // Check if user has CV field in user object
+        if (user && user.cv) {
+          setCvFileName(user.cv);
+          setCvUploaded(true);
+        } else {
+          // No CV found
+          setCvUrl(null);
+          setCvFileName("No CV uploaded");
+          setCvUploaded(false);
+        }
+      }
+    } catch (error) {
+      console.error('Unexpected error loading CV:', error);
+      Alert.alert("Error", "Could not load CV. Please try again later.");
+      
+      // Check if user has CV field in user object as fallback
+      if (user && user.cv) {
+        setCvFileName(user.cv);
+        setCvUploaded(true);
+      } else {
+        setCvFileName("Error loading CV");
+        setCvUploaded(false);
+      }
+    } finally {
+      setIsCvLoading(false);
+    }
+  };
+
+  const handleViewCV = () => {
+    if (cvUrl) {
+      // Open the CV URL
+      Linking.openURL(cvUrl).catch(err => {
+        console.error("Error opening CV URL:", err);
+        Alert.alert("Error", "Cannot open CV preview");
+      });
+    } else if (user && user.cv) {
+      // If we have the CV name but no URL, maybe there's a way to view it
+      Alert.alert("Info", "CV exists but direct viewing is not available in this version.");
+    } else {
+      Alert.alert("Info", "No CV available to view");
+    }
+  };
+
   // User data from API or fallback to dummy data
   const userData = user ? {
     name: user.name,
     role: user.role || "Attendee",
-    university: user.university || "University not specified",
+    university: user.university || "Not specified",
     email: user.email,
-    ticketId: `SFHMMY-2023-${user.id}`,
-    city: "Thessaloniki",
-    school: "School of Electrical and Computer Engineering",
-    year: "4"
+    ticketId: `SFHMMY-${user.user_id?.substring(0, 8) || '00000000'}`,
+    city: user.city || "Not specified",
+    school: user.school || "Not specified",
+    year: user.year?.toString() || "Not specified",
+    cv: user.cv || null
   } : {
     name: "Guest User",
     role: "Guest",
@@ -74,93 +140,12 @@ export default function ProfileScreen() {
     ticketId: "Not available",
     city: "Unknown",
     school: "Unknown",
-    year: "Unknown"
+    year: "Unknown",
+    cv: null
   };
 
-  const handleShowQRCode = async () => {
+  const handleShowQRCode = () => {
     setIsQRCodeVisible(true);
-  };
-
-  // Handle field editing
-  const handleEdit = (field: string) => {
-    if (field === 'email') {
-      Alert.alert("Cannot Edit", "Email cannot be edited.");
-      return;
-    }
-    setEditField(field);
-    setEditValue(userData[field as keyof typeof userData] as string);
-  };
-
-  const handleCancelEdit = () => {
-    setEditField(null);
-    setEditValue("");
-  };
-
-  const handleSaveEdit = async (field: string) => {
-    // In a real app, you would call your API here
-    Alert.alert("Success", `${field} updated successfully!`);
-    setEditField(null);
-  };
-  
-  // CV Upload Handlers
-  const handleCVUpload = async () => {
-    try {
-      setIsUploadingCV(true);
-      
-      const result = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf",
-        copyToCacheDirectory: true
-      });
-      
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const file = result.assets[0];
-        
-        // Check file size (max 5MB)
-        const fileInfo = await FileSystem.getInfoAsync(file.uri);
-        if (fileInfo.size && fileInfo.size > 5 * 1024 * 1024) {
-          Alert.alert("File Too Large", "Please select a file smaller than 5MB");
-          return;
-        }
-        
-        // In a real app, you would upload the file to your server here
-        setCvUploaded(true);
-        setCvFileName(file.name);
-        Alert.alert("Success", "CV uploaded successfully!");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to upload CV. Please try again.");
-      console.error("CV upload error:", error);
-    } finally {
-      setIsUploadingCV(false);
-    }
-  };
-  
-  const handleRemoveCV = () => {
-    Alert.alert(
-      "Remove CV",
-      "Are you sure you want to remove your CV?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Remove", 
-          style: "destructive",
-          onPress: () => {
-            // In a real app, you would call your API here
-            setCvUploaded(false);
-            setCvFileName("No CV uploaded");
-            Alert.alert("Success", "CV removed successfully!");
-          }
-        }
-      ]
-    );
-  };
-  
-  // Workshop Management
-  const handleRemoveWorkshop = (index: number) => {
-    const updatedWorkshops = [...workshops];
-    updatedWorkshops.splice(index, 1);
-    setWorkshops(updatedWorkshops);
-    Alert.alert("Success", "Workshop removed successfully!");
   };
   
   // Render functions for different sections
@@ -169,67 +154,29 @@ export default function ProfileScreen() {
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.sectionTitle}>Personal Information</ThemedText>
         
-        {renderEditableField('name', 'Full Name', userData.name)}
-        {renderEditableField('email', 'Email', userData.email, false)}
-        {renderEditableField('university', 'University', userData.university)}
-        {renderEditableField('school', 'School', userData.school)}
-        {renderEditableField('city', 'City', userData.city)}
-        {renderEditableField('year', 'Year of Study', userData.year)}
+        {renderField('name', 'Full Name', userData.name)}
+        {renderField('email', 'Email', userData.email)}
+        {renderField('university', 'University', userData.university)}
+        {renderField('school', 'School', userData.school)}
+        {renderField('city', 'City', userData.city)}
+        {renderField('year', 'Year of Study', userData.year)}
       </ThemedView>
     );
   };
   
-  const renderEditableField = (field: string, label: string, value: string, editable: boolean = true) => {
-    const isEditing = editField === field;
-    
+  const renderField = (field: string, label: string, value: string) => {
     return (
       <ThemedView style={styles.fieldContainer}>
         <ThemedView style={styles.fieldHeader}>
           <ThemedText style={styles.fieldLabel}>{label}</ThemedText>
-          {editable && !isEditing && (
-            <TouchableOpacity
-              onPress={() => handleEdit(field)}
-              style={styles.editButton}
-            >
-              <IconSymbol name="chevron.left.forwardslash.chevron.right" size={16} color={colorScheme === 'dark' ? 'white' : 'black'} />
-            </TouchableOpacity>
-          )}
-          
-          {isEditing && (
-            <ThemedView style={styles.editActions}>
-              <TouchableOpacity
-                onPress={() => handleSaveEdit(field)}
-                style={[styles.actionButton, styles.saveButton]}
-              >
-                <ThemedText style={styles.actionButtonText}>Save</ThemedText>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                onPress={handleCancelEdit}
-                style={[styles.actionButton, styles.cancelButton]}
-              >
-                <ThemedText style={styles.actionButtonText}>Cancel</ThemedText>
-              </TouchableOpacity>
-            </ThemedView>
-          )}
         </ThemedView>
         
-        {isEditing ? (
-          <TextInput
-            value={editValue}
-            onChangeText={setEditValue}
-            style={styles.editInput}
-            autoFocus
-            selectionColor={'#0a7ea4'}
-          />
-        ) : (
-          <ThemedText style={styles.fieldValue}>
-            {value}
-            {field === 'email' && (
-              <ThemedText style={styles.verifiedBadge}> (verified)</ThemedText>
-            )}
-          </ThemedText>
-        )}
+        <ThemedText style={styles.fieldValue}>
+          {value}
+          {field === 'email' && user?.email_verified_at && (
+            <ThemedText style={styles.verifiedBadge}> (verified)</ThemedText>
+          )}
+        </ThemedText>
       </ThemedView>
     );
   };
@@ -239,17 +186,6 @@ export default function ProfileScreen() {
       <ThemedView style={styles.section}>
         <ThemedView style={styles.sectionHeader}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Registered Workshops</ThemedText>
-          
-          {workshops.length > 0 && (
-            <TouchableOpacity
-              onPress={() => setIsEditingWorkshops(!isEditingWorkshops)}
-              style={[styles.actionButton, isEditingWorkshops ? styles.saveButton : styles.editModeButton]}
-            >
-              <ThemedText style={styles.actionButtonText}>
-                {isEditingWorkshops ? 'Done' : 'Edit'}
-              </ThemedText>
-            </TouchableOpacity>
-          )}
         </ThemedView>
         
         {workshops.length > 0 ? (
@@ -262,15 +198,6 @@ export default function ProfileScreen() {
                 style={styles.workshopIcon} 
               />
               <ThemedText style={styles.workshopTitle}>{workshop}</ThemedText>
-              
-              {isEditingWorkshops && (
-                <TouchableOpacity
-                  onPress={() => handleRemoveWorkshop(index)}
-                  style={styles.removeButton}
-                >
-                  <ThemedText style={styles.removeButtonText}>Remove</ThemedText>
-                </TouchableOpacity>
-              )}
             </ThemedView>
           ))
         ) : (
@@ -285,54 +212,47 @@ export default function ProfileScreen() {
   const renderCV = () => {
     return (
       <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>CV / Resume Management</ThemedText>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>CV / Resume</ThemedText>
         
         <ThemedView style={styles.cvContainer}>
-          {cvUploaded ? (
+          {isCvLoading ? (
+            <ActivityIndicator size="large" color="#0a7ea4" style={styles.cvLoading} />
+          ) : cvUploaded ? (
             <ThemedView style={styles.uploadedCvContainer}>
               <RNView style={styles.cvFileInfo}>
-                <IconSymbol name="chevron.left.forwardslash.chevron.right" size={24} color={'#EB4D3D'} style={styles.cvIcon} />
+                <IconSymbol 
+                  name="chevron.left.forwardslash.chevron.right" 
+                  size={24} 
+                  color={'#EB4D3D'} 
+                  style={styles.cvIcon} 
+                />
                 <ThemedText style={styles.cvFileName}>{cvFileName}</ThemedText>
               </RNView>
               
-              <RNView style={styles.cvActions}>
-                <TouchableOpacity
-                  style={[styles.cvButton, styles.viewButton]}
-                  onPress={() => Alert.alert("View CV", "CV viewing would open here in a real app")}
-                >
-                  <ThemedText style={styles.cvButtonText}>View</ThemedText>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.cvButton, styles.removeButton]}
-                  onPress={handleRemoveCV}
-                >
-                  <ThemedText style={styles.cvButtonText}>Remove</ThemedText>
-                </TouchableOpacity>
-              </RNView>
+              {cvUrl && (
+                <RNView style={styles.cvActions}>
+                  <TouchableOpacity
+                    style={[styles.cvButton, styles.viewButton]}
+                    onPress={handleViewCV}
+                  >
+                    <ThemedText style={styles.cvButtonText}>View</ThemedText>
+                  </TouchableOpacity>
+                </RNView>
+              )}
             </ThemedView>
           ) : (
-            <ThemedView style={styles.cvUploadContainer}>
-              <IconSymbol name="chevron.left.forwardslash.chevron.right" size={36} color={colorScheme === 'dark' ? '#444' : '#ddd'} />
-              <ThemedText style={styles.cvUploadTitle}>No CV uploaded yet</ThemedText>
-              <ThemedText style={styles.cvUploadSubtitle}>PDF format, max 5MB</ThemedText>
-              
-              <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={handleCVUpload}
-                disabled={isUploadingCV}
-              >
-                {isUploadingCV ? (
-                  <ActivityIndicator color="white" size="small" />
-                ) : (
-                  <ThemedText style={styles.uploadButtonText}>Upload CV</ThemedText>
-                )}
-              </TouchableOpacity>
+            <ThemedView style={styles.noCvContainer}>
+              <IconSymbol 
+                name="chevron.left.forwardslash.chevron.right" 
+                size={36} 
+                color={colorScheme === 'dark' ? '#444' : '#ddd'} 
+              />
+              <ThemedText style={styles.noCvText}>No CV uploaded</ThemedText>
             </ThemedView>
           )}
           
           <ThemedText style={styles.cvInfoText}>
-            Your CV will be shared with sponsors for potential job opportunities at the event.
+            Your CV can be shared with sponsors for potential job opportunities at the event.
           </ThemedText>
         </ThemedView>
       </ThemedView>
@@ -374,28 +294,6 @@ export default function ProfileScreen() {
               {/* CV Section */}
               {renderCV()}
               
-              {/* Settings Section */}
-              <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={styles.sectionTitle}>Settings</ThemedText>
-                
-                <ThemedView style={styles.settingItem}>
-                  <ThemedText>Push Notifications</ThemedText>
-                  <Switch 
-                    value={notifications}
-                    onValueChange={setNotifications}
-                    trackColor={{ false: "#767577", true: "#0a7ea4" }}
-                  />
-                </ThemedView>
-                
-                <ThemedView style={styles.settingItem}>
-                  <ThemedText>Dark Mode</ThemedText>
-                  <Switch 
-                    value={darkMode}
-                    onValueChange={setDarkMode}
-                    trackColor={{ false: "#767577", true: "#0a7ea4" }}
-                  />
-                </ThemedView>
-              </ThemedView>
               
               <TouchableOpacity 
                 style={styles.signOutButton}
@@ -498,40 +396,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     opacity: 0.6,
   },
-  editButton: {
-    padding: 4,
-  },
-  editActions: {
-    flexDirection: 'row',
-  },
-  actionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginLeft: 8,
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-  },
-  cancelButton: {
-    backgroundColor: '#F44336',
-  },
-  editModeButton: {
-    backgroundColor: '#0a7ea4',
-  },
-  actionButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  editInput: {
-    borderWidth: 1,
-    borderColor: '#0a7ea4',
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    fontSize: 16,
-  },
   workshopItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -548,17 +412,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
   },
-  removeButton: {
-    backgroundColor: '#F44336',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  removeButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
   emptyStateText: {
     fontStyle: 'italic',
     opacity: 0.7,
@@ -567,6 +420,9 @@ const styles = StyleSheet.create({
   },
   cvContainer: {
     marginTop: 8,
+  },
+  cvLoading: {
+    marginVertical: 30,
   },
   uploadedCvContainer: {
     borderWidth: 1,
@@ -596,7 +452,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 4,
-    marginLeft: 10,
   },
   viewButton: {
     backgroundColor: '#0a7ea4',
@@ -606,35 +461,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
   },
-  cvUploadContainer: {
-    borderWidth: 2,
-    borderStyle: 'dashed',
+  noCvContainer: {
+    alignItems: 'center',
+    borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 20,
-    alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  cvUploadTitle: {
+  noCvText: {
     fontSize: 16,
     fontWeight: '500',
     marginTop: 12,
-  },
-  cvUploadSubtitle: {
-    fontSize: 14,
-    opacity: 0.7,
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  uploadButton: {
-    backgroundColor: '#0a7ea4',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 6,
-  },
-  uploadButtonText: {
-    color: 'white',
-    fontWeight: '600',
+    marginBottom: 8,
   },
   cvInfoText: {
     fontSize: 14,
@@ -653,7 +492,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 40,
+    marginBottom: 80,
   },
   signOutText: {
     color: '#EB4D3D',
