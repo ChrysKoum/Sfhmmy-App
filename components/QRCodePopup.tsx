@@ -1,11 +1,12 @@
 import React from 'react';
-import { Modal, StyleSheet, TouchableOpacity, View, Dimensions, Animated } from 'react-native';
+import { Modal, StyleSheet, Pressable, View, Dimensions, Animated, Image, ActivityIndicator } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { BlurView } from 'expo-blur';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useAuth } from '@/hooks/useAuth';
 
 interface QRCodePopupProps {
   visible: boolean;
@@ -17,6 +18,9 @@ interface QRCodePopupProps {
 export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const { getQrCodeData } = useAuth();
+  const [qrCodeUrl, setQrCodeUrl] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
   
   // Animation for modal appearance
   const [animation] = React.useState(new Animated.Value(0));
@@ -27,7 +31,26 @@ export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProp
       duration: 300,
       useNativeDriver: true,
     }).start();
+
+    // Fetch QR code from API when modal is visible
+    if (visible) {
+      fetchQrCode();
+    }
   }, [visible]);
+
+  const fetchQrCode = async () => {
+    setLoading(true);
+    try {
+      const qrUrl = await getQrCodeData();
+      if (qrUrl) {
+        setQrCodeUrl(qrUrl);
+      }
+    } catch (error) {
+      console.error('Error loading QR code:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   return (
     <Modal
@@ -41,9 +64,8 @@ export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProp
         intensity={20} 
         style={styles.modalOverlay}
       >
-        <TouchableOpacity 
+        <Pressable 
           style={{flex: 1, justifyContent: 'center', alignItems: 'center'}} 
-          activeOpacity={1} 
           onPress={onClose}
         >
           <Animated.View 
@@ -63,25 +85,35 @@ export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProp
               }
             ]}
           >
-            <TouchableOpacity 
+            <Pressable 
               style={styles.closeButton} 
               onPress={onClose}
             >
               <View style={styles.closeButtonCircle}>
                 <ThemedText style={{ fontSize: 16 }}>✕</ThemedText>
               </View>
-            </TouchableOpacity>
+            </Pressable>
             
             <ThemedText type="title" style={styles.title}>{title}</ThemedText>
             
             <View style={styles.qrContainer}>
-              <QRCode
-                value={qrData}
-                size={250}
-                color="#000"
-                backgroundColor="#fff"
-                logoBackgroundColor="#fff"
-              />
+              {loading ? (
+                <ActivityIndicator size="large" color="#0a7ea4" />
+              ) : qrCodeUrl ? (
+                <Image 
+                  source={{ uri: qrCodeUrl }} 
+                  style={{ width: 250, height: 250 }} 
+                  resizeMode="contain"
+                />
+              ) : (
+                <QRCode
+                  value={qrData}
+                  size={250}
+                  color="#000"
+                  backgroundColor="#fff"
+                  logoBackgroundColor="#fff"
+                />
+              )}
             </View>
             
             <ThemedText style={styles.description}>
@@ -92,7 +124,7 @@ export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProp
               Ticket ID: {qrData}
             </ThemedText>
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </BlurView>
     </Modal>
   );
@@ -140,6 +172,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   qrContainer: {
+    width: 250,
+    height: 250,
     padding: 16,
     backgroundColor: 'white',
     borderRadius: 12,
@@ -149,6 +183,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   description: {
     textAlign: 'center',

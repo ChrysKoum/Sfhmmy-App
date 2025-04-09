@@ -1,14 +1,14 @@
 import { Link } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet, TextInput, TouchableOpacity, Image, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { ActivityIndicator, StyleSheet, TextInput, Pressable, Image, Keyboard, View } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function SignInScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('chyrkoum@gmail.com');
+  const [password, setPassword] = useState('12345678');
   const { signIn, isLoading, error } = useAuth();
 
   const handleSignIn = () => {
@@ -17,12 +17,13 @@ export default function SignInScreen() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <Pressable onPress={Keyboard.dismiss} style={{flex: 1}}>
       <ThemedView className="flex-1 p-6 justify-center">
         <ThemedView className="items-center mb-12">
           <Image 
-            source={require('@/assets/images/icon.png')} 
-            className="h-40 w-40 mb-6"
+            source={require('@/assets/images/sfhmmy_logo_dark.png')} 
+            className="h-56 w-56"
+            resizeMode="contain"
           />
           <ThemedText type="title" className="text-center">SFHMMY Conference</ThemedText>
           <ThemedText className="text-center mt-2">Sign in to access the conference app</ThemedText>
@@ -57,17 +58,18 @@ export default function SignInScreen() {
           />
         </ThemedView>
         
-        <TouchableOpacity 
+        <Pressable 
           className={`rounded-lg py-4 ${isLoading ? 'bg-blue-300' : 'bg-blue-500'}`}
           onPress={handleSignIn}
           disabled={isLoading}
+          style={{alignItems: 'center'}}
         >
           {isLoading ? (
             <ActivityIndicator color="white" />
           ) : (
             <ThemedText className="text-white text-center font-semibold">Sign In</ThemedText>
           )}
-        </TouchableOpacity>
+        </Pressable>
         
         <ThemedView className="flex-row justify-center mt-6">
           <ThemedText>Don't have an account? </ThemedText>
@@ -76,6 +78,6 @@ export default function SignInScreen() {
           </Link>
         </ThemedView>
       </ThemedView>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 }
