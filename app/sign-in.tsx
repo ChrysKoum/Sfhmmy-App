@@ -21,7 +21,7 @@ export default function SignInScreen() {
       <ThemedView className="flex-1 p-6 justify-center">
         <ThemedView className="items-center mb-12">
           <Image 
-            source={require('@/assets/images/sfhmmy_logo_dark.png')} 
+            source={require('@/assets/images/logo/sfhmmy_logo_dark.png')} 
             className="h-56 w-56"
             resizeMode="contain"
           />

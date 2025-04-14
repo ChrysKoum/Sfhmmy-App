@@ -10,7 +10,7 @@ import secureStorage from '@/utils/secureStorage';
 const storage = Platform.OS === 'web' ? secureStorage : SecureStore;
 
 // API URL - Update with your actual Laravel API URL
-const API_URL = 'http://192.168.1.4:8000/api'; 
+const API_URL = 'http://192.168.1.3:8000/api'; 
 
 // Define types for user data
 type UserData = {
@@ -299,11 +299,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {isAppLoading ? (
         <View style={styles.appLoadingContainer}>
           <Image 
-            source={require('@/assets/images/sfhmmy_logo_dark.png')} 
+            source={require('@/assets/images/logo/sfhmmy_logo_dark.png')} 
             style={styles.logo}
             resizeMode="contain"
           />
-          <ActivityIndicator size="large" color="#0a7ea4" />
+          <ActivityIndicator size="large" color="#297fff" />
         </View>
       ) : (
         children

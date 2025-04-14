@@ -1,8 +1,12 @@
+export const API_URL = 'http://192.168.1.3:8000/api';
+
 export const API_CONFIG = {
-  BASE_URL: 'https://your-laravel-api.com/api',
+  BASE_URL: API_URL,
   ENDPOINTS: {
     LOGIN: '/login',
     LOGOUT: '/logout',
-    // Add other API endpoints here
+    PROFILE: '/profile',
+    CV: '/cv',
+    QR_CODE: '/user/qrcode'
   }
 };

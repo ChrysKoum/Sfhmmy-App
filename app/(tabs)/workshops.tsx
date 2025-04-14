@@ -1,196 +1,177 @@
 import React, { useState } from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, View } from 'react-native';
+import { FlatList, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { workshopsData } from '@/data/workshopsData';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-
-// Sample workshops data
-const workshopsData = [
-  { 
-    id: '1', 
-    title: 'Machine Learning Fundamentals', 
-    presenter: 'Dr. Maria Johnson',
-    time: '10:00 - 12:30',
-    location: 'Workshop Room 1',
-    capacity: '30 participants',
-    description: 'This workshop introduces the fundamentals of machine learning algorithms and their practical applications. Participants will learn about supervised and unsupervised learning techniques through hands-on examples.',
-    prerequisites: 'Basic programming knowledge, preferably in Python'
-  },
-  { 
-    id: '2', 
-    title: 'Web3 Development Bootcamp', 
-    presenter: 'Alex Chen',
-    time: '13:00 - 15:30',
-    location: 'Workshop Room 2',
-    capacity: '25 participants',
-    description: 'Learn the basics of blockchain development, smart contracts, and decentralized applications (dApps). This hands-on workshop will guide you through creating your first smart contract on Ethereum.',
-    prerequisites: 'JavaScript fundamentals, web development basics'
-  },
-  { 
-    id: '3', 
-    title: 'IoT Prototyping Workshop', 
-    presenter: 'Sara Williams',
-    time: '16:00 - 18:30',
-    location: 'Lab A',
-    capacity: '20 participants',
-    description: 'Get started with Internet of Things prototyping using Arduino and Raspberry Pi. Build a simple IoT device that can collect and transmit data to the cloud.',
-    prerequisites: 'Basic electronics knowledge helpful but not required'
-  },
-  { 
-    id: '4', 
-    title: 'Mobile App UI/UX Design', 
-    presenter: 'James Rodriguez',
-    time: '10:00 - 12:30',
-    location: 'Design Studio',
-    capacity: '25 participants',
-    description: 'Learn essential principles of mobile app design and user experience. This workshop covers wireframing, prototyping, and user testing methods for creating intuitive mobile interfaces.',
-    prerequisites: 'Interest in design, no technical skills required'
-  },
-  { 
-    id: '5', 
-    title: 'Cybersecurity Best Practices', 
-    presenter: 'Michael Chen',
-    time: '14:00 - 16:30',
-    location: 'Workshop Room 3',
-    capacity: '35 participants',
-    description: 'Understand common cybersecurity threats and how to defend against them. This workshop covers security best practices, vulnerability assessment, and basic penetration testing techniques.',
-    prerequisites: 'Basic networking knowledge helpful'
-  },
-];
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function WorkshopsScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  
+  const [activeDay, setActiveDay] = useState('day1');
+  const [activeStatus, setActiveStatus] = useState<'all' | 'waiting' | 'register' | 'checkin'>('all');
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  const days = [
+    { id: 'day1', label: 'Day 1', date: 'April 25' },
+    { id: 'day2', label: 'Day 2', date: 'April 26' },
+    { id: 'day3', label: 'Day 3', date: 'April 27' },
+  ];
+  
+  // Top row status filters: All & Waiting List
+  const topStatusFilters = [
+    { id: 'all', label: 'All' },
+    { id: 'waiting', label: 'Waiting List' },
+  ];
+
+  // Bottom row status filters: Registered & Check In
+  const bottomStatusFilters = [
+    { id: 'registered', label: 'Registered' },
+    { id: 'checkin', label: 'Check In' },
+  ];
+
+  // Helper to extract start time from a string like "10:00 - 12:30"
+  const getStartTime = (timeStr: string): number => {
+    const [start] = timeStr.split(' - ');
+    const [hours, minutes] = start.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // First filter by day, then by status (if not 'all'), and finally sort by start time.
+  const filteredWorkshops = workshopsData
+    .filter(workshop => workshop.day === activeDay)
+    .filter(workshop => activeStatus === 'all' || workshop.status === activeStatus)
+    .sort((a, b) => getStartTime(a.time) - getStartTime(b.time));
+
   const renderWorkshopItem = ({ item }: { item: typeof workshopsData[0] }) => {
     const isExpanded = expandedId === item.id;
-    
+
     return (
-      <ThemedView style={styles.workshopCard}>
+      <ThemedView className="p-4 rounded-xl mb-4 border border-gray-300 dark:border-gray-700">
         <TouchableOpacity onPress={() => toggleExpand(item.id)}>
           <ThemedText type="subtitle">{item.title}</ThemedText>
-          <ThemedText style={styles.presenter}>Presented by: {item.presenter}</ThemedText>
-          
-          <ThemedView style={styles.detailsRow}>
-            <ThemedText style={styles.detailText}>⏰ {item.time}</ThemedText>
-            <ThemedText style={styles.detailText}>📍 {item.location}</ThemedText>
+          <ThemedText className="mt-1.5 mb-3 italic">
+            Presented by: {item.presenter}
+          </ThemedText>
+
+          <ThemedView className="flex-row justify-between mb-2">
+            <ThemedText className="text-sm">⏰ {item.time}</ThemedText>
+            <ThemedText className="text-sm">📍 {item.location}</ThemedText>
           </ThemedView>
-          
-          <ThemedText style={styles.capacity}>Capacity: {item.capacity}</ThemedText>
-          
+
+          <ThemedText className="mb-2.5">Capacity: {item.capacity}</ThemedText>
+
           {isExpanded && (
-            <View style={styles.expandedContent}>
-              <ThemedText style={styles.sectionTitle}>About this workshop:</ThemedText>
-              <ThemedText style={styles.description}>{item.description}</ThemedText>
-              
-              <ThemedText style={styles.sectionTitle}>Prerequisites:</ThemedText>
-              <ThemedText style={styles.description}>{item.prerequisites}</ThemedText>
+            <View className="mt-2.5 p-2.5 bg-blue-50/20 dark:bg-blue-900/10 rounded-lg">
+              <ThemedText className="font-semibold mb-1 mt-2.5">
+                About this workshop:
+              </ThemedText>
+              <ThemedText className="leading-5">{item.description}</ThemedText>
+
+              <ThemedText className="font-semibold mb-1 mt-2.5">
+                Prerequisites:
+              </ThemedText>
+              <ThemedText className="leading-5">{item.prerequisites}</ThemedText>
             </View>
           )}
-          
-          <ThemedText style={styles.expandPrompt}>
-            {isExpanded ? "Show less" : "Show more details..."}
+
+          <ThemedText className="text-blue-600 dark:text-blue-400 my-2.5 text-center">
+            {isExpanded ? 'Show less' : 'Show more details...'}
           </ThemedText>
         </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.registerButton}>
-          <ThemedText style={styles.registerButtonText}>Register</ThemedText>
+
+        <TouchableOpacity className="bg-blue-600 py-2.5 px-4 rounded-lg items-center mt-2.5">
+          <ThemedText className="text-white font-semibold">Register</ThemedText>
         </TouchableOpacity>
       </ThemedView>
     );
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.header}>Workshops</ThemedText>
-        <ThemedText style={styles.subtitle}>
+    <SafeAreaView className="flex-1">
+      <ThemedView className="flex-1 p-4 mb-12">
+        <ThemedText type="title" className="mb-2.5 mt-2.5">
+          Workshops
+        </ThemedText>
+        <ThemedText className="mb-5 opacity-70">
           Explore and register for hands-on workshops led by industry experts
         </ThemedText>
-        
+
+        {/* Day selection */}
+        <View className="flex-row w-full justify-between mb-5">
+          {days.map(day => (
+            <TouchableOpacity
+              key={day.id}
+              onPress={() => setActiveDay(day.id)}
+              className={`flex-1 mx-1 px-5 py-3 rounded-lg items-center ${
+                activeDay === day.id
+                  ? 'bg-blue-500'
+                  : isDark ? 'bg-gray-700' : 'bg-gray-100'
+              }`}
+            >
+              <ThemedText className={`font-semibold ${activeDay === day.id ? 'text-white' : ''}`}>
+                {day.label}
+              </ThemedText>
+              <ThemedText className={`text-xs mt-1 ${activeDay === day.id ? 'text-white' : ''}`}>
+                {day.date}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Status filter: Two Rows */}
+        <View className="mb-5">
+          {/* Top row: All & Waiting List */}
+          <View className="flex-row w-full justify-between mb-2">
+            {topStatusFilters.map(filter => (
+              <TouchableOpacity
+                key={filter.id}
+                onPress={() => setActiveStatus(filter.id as 'all' | 'waiting' | 'register' | 'checkin')}
+                className={`flex-1 mx-1 px-5 py-3 rounded-lg items-center ${
+                  activeStatus === filter.id
+                    ? 'bg-blue-500'
+                    : isDark ? 'bg-gray-700' : 'bg-gray-100'
+                }`}
+              >
+                <ThemedText className={`font-semibold ${activeStatus === filter.id ? 'text-white' : ''}`}>
+                  {filter.label}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {/* Bottom row: Registered & Check In */}
+          <View className="flex-row w-full justify-between">
+            {bottomStatusFilters.map(filter => (
+              <TouchableOpacity
+                key={filter.id}
+                onPress={() => setActiveStatus(filter.id as 'all' | 'waiting' | 'register' | 'checkin')}
+                className={`flex-1 mx-1 px-5 py-3 rounded-lg items-center ${
+                  activeStatus === filter.id
+                    ? 'bg-blue-500'
+                    : isDark ? 'bg-gray-700' : 'bg-gray-100'
+                }`}
+              >
+                <ThemedText className={`font-semibold ${activeStatus === filter.id ? 'text-white' : ''}`}>
+                  {filter.label}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Workshops list */}
         <FlatList
-          data={workshopsData}
+          data={filteredWorkshops}
           renderItem={renderWorkshopItem}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerClassName="pb-5"
         />
       </ThemedView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  header: {
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  subtitle: {
-    marginBottom: 20,
-    opacity: 0.7,
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  workshopCard: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  presenter: {
-    marginTop: 6,
-    marginBottom: 12,
-    fontStyle: 'italic',
-  },
-  detailsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  detailText: {
-    fontSize: 14,
-  },
-  capacity: {
-    marginBottom: 10,
-  },
-  expandPrompt: {
-    color: '#0a7ea4',
-    marginVertical: 10,
-    textAlign: 'center',
-  },
-  expandedContent: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: 'rgba(10, 126, 164, 0.05)',
-    borderRadius: 8,
-  },
-  sectionTitle: {
-    fontWeight: '600',
-    marginBottom: 5,
-    marginTop: 10,
-  },
-  description: {
-    lineHeight: 20,
-  },
-  registerButton: {
-    backgroundColor: '#0a7ea4',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  registerButtonText: {
-    color: 'white',
-    fontWeight: '600',
-  },
-});

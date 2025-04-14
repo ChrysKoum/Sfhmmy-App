@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, StyleSheet, Pressable, View, Dimensions, Animated, Image, ActivityIndicator } from 'react-native';
+import { Modal, Pressable, View, Dimensions, Animated, Image, ActivityIndicator } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { BlurView } from 'expo-blur';
 
@@ -12,10 +12,9 @@ interface QRCodePopupProps {
   visible: boolean;
   onClose: () => void;
   title: string;
-  qrData: string;
 }
 
-export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProps) {
+export function QRCodePopup({ visible, onClose, title }: QRCodePopupProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const { getQrCodeData } = useAuth();
@@ -52,6 +51,8 @@ export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProp
     }
   };
   
+  const { width } = Dimensions.get('window');
+  
   return (
     <Modal
       animationType="none"
@@ -62,16 +63,16 @@ export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProp
       <BlurView 
         tint={isDark ? 'dark' : 'light'}
         intensity={20} 
-        style={styles.modalOverlay}
+        className="flex-1 justify-center items-center"
       >
         <Pressable 
-          style={{flex: 1, justifyContent: 'center', alignItems: 'center'}} 
+          className="flex-1 justify-center items-center" 
           onPress={onClose}
         >
           <Animated.View 
             style={[
-              styles.modalContent,
-              { 
+              {
+                width: width * 0.85,
                 backgroundColor: isDark ? '#1c1c1e' : 'white',
                 opacity: animation,
                 transform: [
@@ -84,30 +85,30 @@ export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProp
                 ],
               }
             ]}
+            className="p-6 rounded-xl items-center shadow-md"
           >
             <Pressable 
-              style={styles.closeButton} 
+              className="absolute top-[-20] right-[-20] z-10" 
               onPress={onClose}
             >
-              <View style={styles.closeButtonCircle}>
-                <ThemedText style={{ fontSize: 16 }}>✕</ThemedText>
+              <View className="w-10 h-10 rounded-full bg-gray-200 justify-center items-center shadow">
+                <ThemedText className="text-base">✕</ThemedText>
               </View>
             </Pressable>
             
-            <ThemedText type="title" style={styles.title}>{title}</ThemedText>
+            <ThemedText type="title" className="mt-2.5 mb-6">{title}</ThemedText>
             
-            <View style={styles.qrContainer}>
+            <View className="w-[250px] h-[250px] p-4 bg-white rounded-xl mb-6 shadow justify-center items-center">
               {loading ? (
-                <ActivityIndicator size="large" color="#0a7ea4" />
+                <ActivityIndicator size="large" color="#297fff" />
               ) : qrCodeUrl ? (
                 <Image 
                   source={{ uri: qrCodeUrl }} 
-                  style={{ width: 250, height: 250 }} 
+                  className="w-[250px] h-[250px]"
                   resizeMode="contain"
                 />
               ) : (
                 <QRCode
-                  value={qrData}
                   size={250}
                   color="#000"
                   backgroundColor="#fff"
@@ -116,82 +117,13 @@ export function QRCodePopup({ visible, onClose, title, qrData }: QRCodePopupProp
               )}
             </View>
             
-            <ThemedText style={styles.description}>
+            <ThemedText className="text-center mb-4 opacity-70">
               Present this QR code at the registration desk and workshop sessions
             </ThemedText>
-            
-            <ThemedText style={styles.ticketId}>
-              Ticket ID: {qrData}
-            </ThemedText>
+          
           </Animated.View>
         </Pressable>
       </BlurView>
     </Modal>
   );
 }
-
-const { width } = Dimensions.get('window');
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: width * 0.85,
-    padding: 24,
-    borderRadius: 16,
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: -20,
-    right: -20,
-    zIndex: 1,
-  },
-  closeButtonCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f2f2f7',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  title: {
-    marginTop: 10,
-    marginBottom: 24,
-  },
-  qrContainer: {
-    width: 250,
-    height: 250,
-    padding: 16,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  description: {
-    textAlign: 'center',
-    marginBottom: 16,
-    opacity: 0.7,
-  },
-  ticketId: {
-    fontWeight: '500',
-  },
-});
