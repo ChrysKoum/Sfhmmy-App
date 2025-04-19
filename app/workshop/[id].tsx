@@ -76,6 +76,7 @@ export default function WorkshopDetailsScreen() {
 
       const workshopsArray = Array.isArray(allWorkshops) ? allWorkshops : [];
       const currentWorkshop = workshopsArray.find((w: Workshop) => w.workshop_id === workshopId) ?? null;
+      console.log("Current Workshop:", currentWorkshop);
       setWorkshop(currentWorkshop);
 
       if (currentWorkshop) {
@@ -191,7 +192,7 @@ export default function WorkshopDetailsScreen() {
   // --- Render Logic ---
   if (loading && !workshop) { // Show full screen loader only on initial load
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-gray-100 dark:bg-black">
+      <SafeAreaView className={`flex-1 justify-center items-center ${isDark ? 'bg-black' : 'bg-gray-100'}`}>
         <ActivityIndicator size="large" color={isDark ? "#FFFFFF" : "#000000"} />
         <ThemedText className="mt-4 text-lg">Loading Workshop...</ThemedText>
       </SafeAreaView>
@@ -200,8 +201,8 @@ export default function WorkshopDetailsScreen() {
 
   if (!workshop) {
     return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-gray-100 dark:bg-black">
-         <Stack.Screen options={{ title: 'Not Found' }} />
+      <SafeAreaView className={`flex-1 justify-center items-center ${isDark ? 'bg-black' : 'bg-gray-100'}`}>
+        <Stack.Screen options={{ title: 'Not Found' }} />
         <ThemedText className="text-lg text-red-500">Workshop not found.</ThemedText>
         <TouchableOpacity onPress={() => router.back()} className="mt-4 p-2 bg-blue-500 rounded">
             <ThemedText className="text-white">Go Back</ThemedText>
@@ -290,7 +291,7 @@ export default function WorkshopDetailsScreen() {
        <Stack.Screen options={{ title: workshop.title }} />
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Image */}
-        <View className="w-full aspect-[16/9] bg-gray-200 dark:bg-gray-700 mb-4">
+        <View className={`w-full aspect-[16/9] ${isDark ? 'bg-gray-700' : 'bg-gray-200'} mb-4`}>
           {workshop.image_url ? (
             <Image
               source={{ uri: `${BASE_IMAGE_URL}${workshop.image_url}` }}
@@ -319,11 +320,11 @@ export default function WorkshopDetailsScreen() {
           </View>
 
           {/* Availability */}
-           <View className="items-center mb-6 p-2 rounded-lg bg-gray-200 dark:bg-gray-700">
+           <View className={`items-center mb-6 p-2 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
              <ThemedText className="text-lg font-semibold">
                {spotsFilled} / {workshop.max_participants} spots filled
              </ThemedText>
-             <ThemedText className={`text-sm font-bold ${workshop.availability <= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+             <ThemedText className={`text-sm font-bold ${workshop.availability <= 0 ? (isDark ? 'text-red-400' : 'text-red-600') : (isDark ? 'text-green-400' : 'text-green-600')}`}>
                {workshop.availability > 0 ? `${workshop.availability} spots available` : 'Workshop Full'}
              </ThemedText>
            </View>
