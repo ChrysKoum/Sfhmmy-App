@@ -24,13 +24,17 @@ export default function HomeScreen() {
         {/* Hero Section */}
         <ThemedView className="p-6 items-center justify-center">
           {/* Check if image is loading correctly */}
-          <View className="w-48 h-48 mb-4 bg-gray-100 dark:bg-gray-800 rounded-full items-center justify-center overflow-hidden">
+            <View className={`w-48 h-48 mb-4 rounded-full items-center justify-center overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
             <Image 
-              source={require('@/assets/images/logo/sfhmmy_logo_dark.png')} 
+               source={
+              isDark
+                ? require("@/assets/images/logo/sfhmmy_logo_white.png")
+                : require("@/assets/images/logo/sfhmmy_logo_dark.png")
+              }
               className="w-full h-full"
               resizeMode="contain"
             />
-          </View>
+            </View>
           
           <ThemedText type="title" className="text-center mb-2">ΣΦΗΜΜΥ 16</ThemedText>
           

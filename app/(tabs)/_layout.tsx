@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
@@ -37,7 +36,8 @@ export default function TabLayout() {
             const { options } = descriptors[route.key];
             const isFocused = state.index === index;
 
-            // Skip the QR code route from the normal tab list.
+            // Skip the QR code route from the normal tab list, BUT ONLY if it exists
+            // This was causing an issue where any tab might be treated as "qrcode"
             if (route.name === 'qrcode') return null;
 
             const onPress = () => {
@@ -47,7 +47,8 @@ export default function TabLayout() {
                 canPreventDefault: true,
               });
               if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
+                // The `merge: true` option makes sure that the params inside the tab screen are preserved
+                navigation.navigate({ name: route.name, merge: true });
               }
             };
 
@@ -140,7 +141,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* Hidden QR screen; handled separately via the custom QR button */}
+      {/* Make sure this tab exists in your file structure */}
       <Tabs.Screen
         name="workshops"
         options={{

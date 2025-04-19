@@ -10,7 +10,7 @@ import secureStorage from '@/utils/secureStorage';
 const storage = Platform.OS === 'web' ? secureStorage : SecureStore;
 
 // API URL - Update with your actual Laravel API URL
-const API_URL = 'http://192.168.1.3:8000/api'; 
+const API_URL = 'http://192.168.10.160:8000/api'; 
 
 // Define types for user data
 type UserData = {

@@ -1,177 +1,121 @@
-import React, { useState } from 'react';
-import { FlatList, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ActivityIndicator, Image, ScrollView, View, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { workshopsData } from '@/data/workshopsData';
+import { useRouter } from 'expo-router'; // Import useRouter for navigation
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { workshopFetch } from '@/services/workshopService';
+// Removed RenderHTML import as it's not needed on the list screen anymore
+// import api from '@/services/api'; // Keep if BASE_IMAGE_URL logic depends on it, otherwise remove
+
+interface Workshop {
+  workshop_id: string;
+  title: string;
+  description: string; // Keep for potential future use or pass to details
+  date: string;
+  hour: string;
+  end_time: string | null;
+  availability: number;
+  image_url: string;
+  max_participants: number;
+  created_at: string;
+  updated_at: string;
+}
+
+const BASE_IMAGE_URL = 'http://192.168.10.160:8000/storage/';
 
 export default function WorkshopsScreen() {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [activeDay, setActiveDay] = useState('day1');
-  const [activeStatus, setActiveStatus] = useState<'all' | 'waiting' | 'register' | 'checkin'>('all');
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [loading, setLoading] = useState(true);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const router = useRouter(); // Initialize router
 
-  const toggleExpand = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
+  useEffect(() => {
+    async function loadWorkshops() {
+      setLoading(true); // Ensure loading is true at the start
+      try {
+        const data = await workshopFetch();
+        setWorkshops(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to load workshops:", error);
+        setWorkshops([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadWorkshops();
+  }, []);
+
+  const handlePressWorkshop = (workshopId: string) => {
+    router.push(`/workshop/${workshopId}`);
   };
 
-  const days = [
-    { id: 'day1', label: 'Day 1', date: 'April 25' },
-    { id: 'day2', label: 'Day 2', date: 'April 26' },
-    { id: 'day3', label: 'Day 3', date: 'April 27' },
-  ];
-  
-  // Top row status filters: All & Waiting List
-  const topStatusFilters = [
-    { id: 'all', label: 'All' },
-    { id: 'waiting', label: 'Waiting List' },
-  ];
-
-  // Bottom row status filters: Registered & Check In
-  const bottomStatusFilters = [
-    { id: 'registered', label: 'Registered' },
-    { id: 'checkin', label: 'Check In' },
-  ];
-
-  // Helper to extract start time from a string like "10:00 - 12:30"
-  const getStartTime = (timeStr: string): number => {
-    const [start] = timeStr.split(' - ');
-    const [hours, minutes] = start.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
-
-  // First filter by day, then by status (if not 'all'), and finally sort by start time.
-  const filteredWorkshops = workshopsData
-    .filter(workshop => workshop.day === activeDay)
-    .filter(workshop => activeStatus === 'all' || workshop.status === activeStatus)
-    .sort((a, b) => getStartTime(a.time) - getStartTime(b.time));
-
-  const renderWorkshopItem = ({ item }: { item: typeof workshopsData[0] }) => {
-    const isExpanded = expandedId === item.id;
-
+  if (loading) {
     return (
-      <ThemedView className="p-4 rounded-xl mb-4 border border-gray-300 dark:border-gray-700">
-        <TouchableOpacity onPress={() => toggleExpand(item.id)}>
-          <ThemedText type="subtitle">{item.title}</ThemedText>
-          <ThemedText className="mt-1.5 mb-3 italic">
-            Presented by: {item.presenter}
-          </ThemedText>
-
-          <ThemedView className="flex-row justify-between mb-2">
-            <ThemedText className="text-sm">⏰ {item.time}</ThemedText>
-            <ThemedText className="text-sm">📍 {item.location}</ThemedText>
-          </ThemedView>
-
-          <ThemedText className="mb-2.5">Capacity: {item.capacity}</ThemedText>
-
-          {isExpanded && (
-            <View className="mt-2.5 p-2.5 bg-blue-50/20 dark:bg-blue-900/10 rounded-lg">
-              <ThemedText className="font-semibold mb-1 mt-2.5">
-                About this workshop:
-              </ThemedText>
-              <ThemedText className="leading-5">{item.description}</ThemedText>
-
-              <ThemedText className="font-semibold mb-1 mt-2.5">
-                Prerequisites:
-              </ThemedText>
-              <ThemedText className="leading-5">{item.prerequisites}</ThemedText>
-            </View>
-          )}
-
-          <ThemedText className="text-blue-600 dark:text-blue-400 my-2.5 text-center">
-            {isExpanded ? 'Show less' : 'Show more details...'}
-          </ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="bg-blue-600 py-2.5 px-4 rounded-lg items-center mt-2.5">
-          <ThemedText className="text-white font-semibold">Register</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
+      <SafeAreaView className="flex-1 justify-center items-center bg-gray-100 dark:bg-black">
+        <ActivityIndicator size="large" color={isDark ? "#FFFFFF" : "#000000"} />
+        <ThemedText className="mt-4 text-lg">Loading Workshops...</ThemedText>
+      </SafeAreaView>
     );
-  };
+  }
 
   return (
-    <SafeAreaView className="flex-1">
-      <ThemedView className="flex-1 p-4 mb-12">
-        <ThemedText type="title" className="mb-2.5 mt-2.5">
-          Workshops
-        </ThemedText>
-        <ThemedText className="mb-5 opacity-70">
-          Explore and register for hands-on workshops led by industry experts
-        </ThemedText>
-
-        {/* Day selection */}
-        <View className="flex-row w-full justify-between mb-5">
-          {days.map(day => (
-            <TouchableOpacity
-              key={day.id}
-              onPress={() => setActiveDay(day.id)}
-              className={`flex-1 mx-1 px-5 py-3 rounded-lg items-center ${
-                activeDay === day.id
-                  ? 'bg-blue-500'
-                  : isDark ? 'bg-gray-700' : 'bg-gray-100'
-              }`}
-            >
-              <ThemedText className={`font-semibold ${activeDay === day.id ? 'text-white' : ''}`}>
-                {day.label}
-              </ThemedText>
-              <ThemedText className={`text-xs mt-1 ${activeDay === day.id ? 'text-white' : ''}`}>
-                {day.date}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Status filter: Two Rows */}
-        <View className="mb-5">
-          {/* Top row: All & Waiting List */}
-          <View className="flex-row w-full justify-between mb-2">
-            {topStatusFilters.map(filter => (
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-black' : 'bg-gray-50'}`}>
+      <ScrollView  className={`mb-16`} contentContainerStyle={{ paddingVertical: 20, paddingHorizontal: 16 }}>
+        <ThemedText type="title" className="text-center mb-6 px-4">Available Workshops</ThemedText>
+        {workshops && workshops.length > 0 ? (
+          // Use flex-wrap for a grid-like layout if desired, or keep as a list
+          <View className="flex-row flex-wrap justify-between">
+            {workshops.map((workshop) => (
               <TouchableOpacity
-                key={filter.id}
-                onPress={() => setActiveStatus(filter.id as 'all' | 'waiting' | 'register' | 'checkin')}
-                className={`flex-1 mx-1 px-5 py-3 rounded-lg items-center ${
-                  activeStatus === filter.id
-                    ? 'bg-blue-500'
-                    : isDark ? 'bg-gray-700' : 'bg-gray-100'
-                }`}
+                key={workshop.workshop_id}
+                className={`w-[48%] mb-4 overflow-hidden rounded-xl shadow-lg ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}
+                onPress={() => handlePressWorkshop(workshop.workshop_id)}
+                activeOpacity={0.7}
               >
-                <ThemedText className={`font-semibold ${activeStatus === filter.id ? 'text-white' : ''}`}>
-                  {filter.label}
-                </ThemedText>
+                {/* Image Section */}
+                <View className="w-full aspect-square bg-gray-200 dark:bg-gray-700">
+                  {workshop.image_url ? (
+                    <Image
+                      source={{ uri: `${BASE_IMAGE_URL}${workshop.image_url}` }}
+                      className="w-full h-full"
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View className="w-full h-full items-center justify-center">
+                      <ThemedText className="text-gray-500 text-xs">No Image</ThemedText>
+                    </View>
+                  )}
+                </View>
+
+                {/* Content Section (Minimal) */}
+                <View className="p-3">
+                  <ThemedText className="font-semibold text-sm mb-1" numberOfLines={2} ellipsizeMode="tail">
+                    {workshop.title}
+                  </ThemedText>
+                  <ThemedText className="text-xs opacity-70 mb-1">
+                    {new Date(workshop.date).toLocaleDateString('el-GR', { month: 'short', day: 'numeric' })}
+                    {' @ '}
+                    {workshop.hour.slice(0, 5)}
+                  </ThemedText>
+                  <ThemedText className={`text-xs font-bold ${workshop.availability <= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                    {workshop.availability > 0 ? `${workshop.availability} spots left` : 'Full'}
+                  </ThemedText>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
-          {/* Bottom row: Registered & Check In */}
-          <View className="flex-row w-full justify-between">
-            {bottomStatusFilters.map(filter => (
-              <TouchableOpacity
-                key={filter.id}
-                onPress={() => setActiveStatus(filter.id as 'all' | 'waiting' | 'register' | 'checkin')}
-                className={`flex-1 mx-1 px-5 py-3 rounded-lg items-center ${
-                  activeStatus === filter.id
-                    ? 'bg-blue-500'
-                    : isDark ? 'bg-gray-700' : 'bg-gray-100'
-                }`}
-              >
-                <ThemedText className={`font-semibold ${activeStatus === filter.id ? 'text-white' : ''}`}>
-                  {filter.label}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Workshops list */}
-        <FlatList
-          data={filteredWorkshops}
-          renderItem={renderWorkshopItem}
-          keyExtractor={item => item.id}
-          contentContainerClassName="pb-5"
-        />
-      </ThemedView>
+        ) : (
+          <ThemedView className="items-center justify-center py-10 px-4 rounded-lg bg-gray-100 dark:bg-gray-800 mt-4">
+            <ThemedText className="text-center text-gray-500 dark:text-gray-400">
+              No workshops are currently available. Please check back later.
+            </ThemedText>
+          </ThemedView>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }

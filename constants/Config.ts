@@ -1,4 +1,4 @@
-export const API_URL = 'http://192.168.1.3:8000/api';
+export const API_URL = 'http://192.168.10.160:8000/api';
 
 export const API_CONFIG = {
   BASE_URL: API_URL,
@@ -6,7 +6,6 @@ export const API_CONFIG = {
     LOGIN: '/login',
     LOGOUT: '/logout',
     PROFILE: '/profile',
-    CV: '/cv',
     QR_CODE: '/user/qrcode'
   }
 };

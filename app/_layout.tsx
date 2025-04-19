@@ -7,6 +7,23 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import "../global.css";
 
+// Suppress react-native-render-html defaultProps warnings
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  const warningMsg = typeof args[0] === 'string' ? args[0] : '';
+  if (
+    warningMsg.includes('Support for defaultProps will be removed') &&
+    (warningMsg.includes('TRenderEngineProvider') ||
+     warningMsg.includes('MemoizedTNodeRenderer') ||
+     warningMsg.includes('TNodeChildrenRenderer') ||
+     warningMsg.includes('bound renderChildren'))
+  ) {
+    return;
+  }
+  originalConsoleError.apply(console, args);
+};
+
+
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { ThemeProvider, useThemeContext } from '@/hooks/useThemeContext';
 
@@ -51,8 +68,10 @@ function RootLayoutNav() {
 
     const inAuthGroup = segments[0] === '(auth)';
     const inTabsGroup = segments[0] === '(tabs)';
-
-    if (isAuthenticated && !inTabsGroup) {
+    const isWorkshopRoute = segments[0] === 'workshop'; // Add this check
+    
+    // Allow workshop routes for authenticated users
+    if (isAuthenticated && !inTabsGroup && !isWorkshopRoute) {
       router.replace('/(tabs)');
     } else if (!isAuthenticated && !segments[0]?.includes('sign-in')) {
       router.replace('/sign-in');
@@ -61,9 +80,17 @@ function RootLayoutNav() {
 
   return (
     <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="sign-in" />
-        <Stack.Screen name="(tabs)" />
+      <Stack>
+        <Stack.Screen name="sign-in" options={{ headerShown: true }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="workshop/[id]" 
+          options={{ 
+            presentation: 'card',
+            headerBackTitle: 'Back',
+            title: 'Workshop Details' 
+          }} 
+        />
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
       </Stack>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
