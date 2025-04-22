@@ -104,7 +104,7 @@ export default function ProfileScreen() {
                 userData={userData} 
                 emailVerified={!!user?.email_verified_at} 
               />
-              <WorkshopsList /> {/* <-- Use new component here */}
+              <WorkshopsList />
 
               {/* Settings Section */}
               <ThemedView className="p-4 mt-8 rounded-xl border border-gray-300 dark:border-gray-700">

@@ -20,7 +20,7 @@ export const eventsData = [
     name: "Spyros Chatzivasileiadis - 'Trustworthy Machine Learning in Power Systems'",
     place: "Αίθουσα Τελετών ΑΠΘ",
     room: "Ceremony Hall",
-    time: "11:00 AM - 12:00 AM",
+    time: "11:00 AM - 12:00 PM",
     day: "Παρασκευή"
   },
   {
@@ -92,7 +92,7 @@ export const eventsData = [
     name: "ASAT Workshop - Registration",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο I",
-    time: "11:45 AM - 12:15 AM",
+    time: "11:45 AM - 12:15 PM",
     day: "Παρασκευή"
   },
   {
@@ -100,7 +100,7 @@ export const eventsData = [
     name: "ASAT Workshop",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο I",
-    time: "12:15 AM - 02:15 PM",
+    time: "12:15 PM - 02:15 PM",
     day: "Παρασκευή"
   },
   {
@@ -108,7 +108,7 @@ export const eventsData = [
     name: "Hellenic Cables Workshop - Registration",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο II",
-    time: "12:00 PM - 12:30 AM",
+    time: "12:00 PM - 12:30 PM",
     day: "Παρασκευή"
   },
   {
@@ -116,7 +116,7 @@ export const eventsData = [
     name: "Hellenic Cables Workshop",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο II",
-    time: "12:30 AM - 02:00 PM",
+    time: "12:30 PM - 02:00 PM",
     day: "Παρασκευή"
   },
   {
@@ -124,7 +124,7 @@ export const eventsData = [
     name: "Panther Racing Workshop - Registration",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο III",
-    time: "12:00 AM - 12:30 AM",
+    time: "12:00 PM - 12:30 PM",
     day: "Παρασκευή"
   },
   {
@@ -132,7 +132,7 @@ export const eventsData = [
     name: "Panther Racing Workshop",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο III",
-    time: "12:30 AM - 02:00 PM",
+    time: "12:30 PM - 02:00 PM",
     day: "Παρασκευή"
   },
   {
@@ -462,7 +462,7 @@ export const eventsData = [
     name: "EMBS IEEE NTUA Workshop",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο I",
-    time: "10:00 AM - 12:00 AM",
+    time: "10:00 AM - 12:00 PM",
     day: "Σάββατο"
   },
   {
@@ -501,7 +501,7 @@ export const eventsData = [
     type: "Workshop Registration",
     name: "ΑΔΜΗΕ Workshop - Registration",
     place: "ΚΕΔΕΑ",
-    room: "Αμφιθέατρο IΙ",
+    room: "Αμφιθέατρο II",
     time: "11:30 AM - 12:00 PM",
     day: "Σάββατο"
   },
@@ -509,7 +509,7 @@ export const eventsData = [
     type: "Workshop",
     name: "ΑΔΜΗΕ Workshop",
     place: "ΚΕΔΕΑ",
-    room: "Αμφιθέατρο IΙ",
+    room: "Αμφιθέατρο II",
     time: "12:00 PM - 01:30 PM",
     day: "Σάββατο"
   },
@@ -517,7 +517,7 @@ export const eventsData = [
     type: "Workshop Registration",
     name: "ART Workshop - Registration",
     place: "ΚΕΔΕΑ",
-    room: "Αμφιθέατρο IIΙ",
+    room: "Αμφιθέατρο III",
     time: "11:30 AM - 12:00 PM",
     day: "Σάββατο"
   },
@@ -525,7 +525,7 @@ export const eventsData = [
     type: "Workshop",
     name: "ART Workshop",
     place: "ΚΕΔΕΑ",
-    room: "Αμφιθέατρο IIΙ",
+    room: "Αμφιθέατρο III",
     time: "12:00 PM - 01:30 PM",
     day: "Σάββατο"
   },
@@ -645,7 +645,7 @@ export const eventsData = [
     type: "Workshop Registration",
     name: "VROOM Workshop - Registration ",
     place: "ΑΠΘ private space",
-    room: "VROOM LAB ",
+    room: "VROOM LAB",
     time: "11:30 AM - 12:00 PM",
     day: "Σάββατο"
   },

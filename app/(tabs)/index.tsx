@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/ThemedView';
 import Footer from '@/components/index/Footer';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { topics } from '@/data/indexData';
+import { SponsorsSection } from '@/components/sponsors/SponsorsSection';
 
 const { width } = Dimensions.get('window');
 
@@ -107,6 +108,9 @@ export default function HomeScreen() {
           </View>
         </ThemedView>
         
+        {/* Sponsors Section */}
+        <SponsorsSection />
+
         {/* Footer */}
         <Footer/>
       </ScrollView>

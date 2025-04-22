@@ -69,12 +69,13 @@ function RootLayoutNav() {
   
     const inTabsGroup = segments[0] === '(tabs)';
     const isWorkshopRoute = segments[0] === 'workshop';
+    const isSponsorRoute = segments[0] === 'sponsor';
     const isSignInRoute = segments[0] === 'sign-in';
     
     // Allow workshop routes for authenticated users
     if (isAuthenticated) {
       // If user is authenticated and not in tabs or workshop route, redirect to tabs
-      if (!inTabsGroup && !isWorkshopRoute) {
+      if (!inTabsGroup && !isWorkshopRoute && !isSponsorRoute) {
         router.replace('/(tabs)');
       }
     } else {
@@ -96,6 +97,14 @@ function RootLayoutNav() {
             presentation: 'card',
             headerBackTitle: 'Back',
             title: 'Workshop Details' 
+          }} 
+        />
+        <Stack.Screen 
+          name="sponsor/[id]" 
+          options={{ 
+            presentation: 'card',
+            headerBackTitle: 'Back',
+            title: 'Sponsor Details' 
           }} 
         />
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
