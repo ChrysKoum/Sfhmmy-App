@@ -84,12 +84,12 @@ export default function SignInScreen() {
           )}
         </Pressable>
         
-        <ThemedView className="flex-row justify-center mt-6">
+        {/* <ThemedView className="flex-row justify-center mt-6">
           <ThemedText>Don't have an account? </ThemedText>
           <Link href={"/register" as any}>
             <ThemedText className="text-blue-500">Register</ThemedText>
           </Link>
-        </ThemedView>
+        </ThemedView> */}
       </ThemedView>
     </Pressable>
   );

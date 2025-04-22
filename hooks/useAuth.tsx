@@ -2,15 +2,13 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { ActivityIndicator, Image, View, StyleSheet, Platform } from 'react-native';
+import { API_URL, API_CONFIG } from '@/constants/Config';
 
 // Import our custom secure storage implementation for web
 import secureStorage from '@/utils/secureStorage';
 
 // Use the appropriate storage method based on platform
 const storage = Platform.OS === 'web' ? secureStorage : SecureStore;
-
-// API URL - Update with your actual Laravel API URL
-const API_URL = 'http://192.168.10.160:8000/api'; 
 
 // Define types for user data
 type UserData = {
@@ -19,6 +17,7 @@ type UserData = {
   email: string;
   role: string;
   university?: string;
+  email_verified_at?: string | null; // Add this line
   // Add other user fields as needed
 };
 

@@ -145,7 +145,7 @@ export const eventsData = [
   },
   {
     type: "Workshop",
-    name: "Broken Shells Workshop & NG-DSALab Workshop",
+    name: "Broken Shells & NG-DSALab Workshop",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο I",
     time: "03:00 PM - 05:00 PM",
@@ -451,7 +451,7 @@ export const eventsData = [
   // Workshops & Registrations (ΚΕΔΕΑ, ΤΑΞΥΠ, ΑΠΘ Private Space)
   {
     type: "Workshop Registration",
-    name: "EMBS NTUA Workshop - Registration",
+    name: "EMBS IEEE NTUA Workshop - Registration",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο I",
     time: "09:30 AM - 10:00 AM",
@@ -459,7 +459,7 @@ export const eventsData = [
   },
   {
     type: "Workshop",
-    name: "EMBS NTUA Workshop",
+    name: "EMBS IEEE NTUA Workshop",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο I",
     time: "10:00 AM - 12:00 AM",
@@ -531,7 +531,7 @@ export const eventsData = [
   },
   {
     type: "Workshop Registration",
-    name: "CS NTUA Workshop - Registration",
+    name: "CS IEEE NTUA Workshop - Registration",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο I",
     time: "02:30 PM - 03:00 PM",
@@ -539,7 +539,7 @@ export const eventsData = [
   },
   {
     type: "Workshop",
-    name: "CS NTUA Workshop",
+    name: "CS IEEE NTUA Workshop",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο I",
     time: "03:00 PM - 04:30 PM",
@@ -579,7 +579,7 @@ export const eventsData = [
   },
   {
     type: "Workshop Registration",
-    name: "RAS NTUA Workshop - Registration",
+    name: "RAS IEEE NTUA Workshop - Registration",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο II",
     time: "05:00 PM - 05:30 PM",
@@ -587,7 +587,7 @@ export const eventsData = [
   },
   {
     type: "Workshop",
-    name: "RAS NTUA Workshop",
+    name: "RAS IEEE NTUA Workshop",
     place: "ΚΕΔΕΑ",
     room: "Αμφιθέατρο II",
     time: "05:30 PM - 07:30 PM",
@@ -764,7 +764,7 @@ export const eventsData = [
   },
   {
     type: "Speech",
-    name: "Nikolaos Pλeros - 'Photonics for computing and AI accelerators'",
+    name: "Nikolaos Pleros - 'Photonics for computing and AI accelerators'",
     place: "Αίθουσα Τελετών ΑΠΘ",
     room: "Ceremony Hall",
     time: "04:00 PM - 05:00 PM",

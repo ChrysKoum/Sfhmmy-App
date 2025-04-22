@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, TouchableOpacity, ScrollView, Switch, View } from 'react-native';
+import { ActivityIndicator, TouchableOpacity, ScrollView, Switch, View, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Linking } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
@@ -8,13 +8,43 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { QRCodePopup } from '@/components/QRCodePopup';
-import { ProfileHeader } from '@/components/profile/ProfileHeader';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { PersonalInfo } from '@/components/profile/PersonalInfo';
 import { WorkshopsList } from '@/components/profile/WorkshopsList'; // <-- use new component
 
 import { useThemeContext } from '@/hooks/useThemeContext';
 import { useAuth } from '@/hooks/useAuth';
 import { formatUserData } from '@/services/profileService';
+
+interface ProfileHeaderProps {
+  userData: {
+    name: string;
+    role: string;
+    university: string;
+  };
+  onShowQRCode: () => void;
+}
+
+export function ProfileHeader({ userData, onShowQRCode }: ProfileHeaderProps) {
+  return (
+    <ThemedView className="items-center my-5">
+      {userData.imageUrl ? (
+        <Image
+          source={{ uri: userData.imageUrl }}
+          className="w-48 h-48 rounded-full mb-4"
+        />
+      ) : (
+        <View className="w-48 h-48 rounded-full mb-4 bg-gray-200 items-center justify-center">
+          <IconSymbol name="person.fill" size={80} color="#9ca3af" />
+        </View>
+      )}
+      <ThemedText type="title">{userData.name}</ThemedText>
+      <ThemedText className="opacity-70 mt-1">{userData.role}</ThemedText>
+      <ThemedText className="opacity-70 mb-4">{userData.university}</ThemedText>
+      {/* Optionally add QR code button here */}
+    </ThemedView>
+  );
+}
 
 export default function ProfileScreen() {
   const { isDark, theme, setTheme } = useThemeContext();
@@ -81,17 +111,6 @@ export default function ProfileScreen() {
                 <ThemedText type="subtitle" className="mb-4">
                   Settings
                 </ThemedText>
-                <View className="flex-row items-center justify-between mb-4">
-                  <ThemedText className="text-base">
-                    Notifications
-                  </ThemedText>
-                  <Switch
-                    value={notificationsEnabled}
-                    onValueChange={toggleNotifications}
-                    trackColor={{ false: "#767577", true: "#297fff" }}
-                    thumbColor={notificationsEnabled ? "#f4f3f4" : "#f4f3f4"}
-                  />
-                </View>
                 <View className="flex-row items-center justify-between">
                   <ThemedText className="text-base">
                     Dark Theme

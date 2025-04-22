@@ -3,6 +3,7 @@ import { ActivityIndicator, Image, ScrollView, View, TouchableOpacity, useWindow
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router'; // Import useRouter for navigation
 
+import { BASE_IMAGE_URL } from '@/constants/Config';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -24,7 +25,7 @@ interface Workshop {
   updated_at: string;
 }
 
-const BASE_IMAGE_URL = 'http://192.168.10.160:8000/storage/';
+
 
 export default function WorkshopsScreen() {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
@@ -65,7 +66,7 @@ export default function WorkshopsScreen() {
   return (
     <SafeAreaView className={`flex-1 ${isDark ? 'bg-black' : 'bg-gray-50'}`}>
       <ScrollView  className={`mb-16`} contentContainerStyle={{ paddingVertical: 20, paddingHorizontal: 16 }}>
-        <ThemedText type="title" className="text-center mb-6 px-4">Available Workshops</ThemedText>
+        <ThemedText type="title" className="text-center mt-6 mb-6 px-4">Workshops</ThemedText>
         {workshops && workshops.length > 0 ? (
           // Use flex-wrap for a grid-like layout if desired, or keep as a list
           <View className="flex-row flex-wrap justify-between">
@@ -80,9 +81,9 @@ export default function WorkshopsScreen() {
                 <View className="w-full aspect-square bg-gray-200 dark:bg-gray-700">
                   {workshop.image_url ? (
                     <Image
-                      source={{ uri: `${BASE_IMAGE_URL}${workshop.image_url}` }}
+                      source={{ uri: `${BASE_IMAGE_URL}/images/${workshop.image_url}` }}
                       className="w-full h-full"
-                      resizeMode="cover"
+                      resizeMode="contain"
                     />
                   ) : (
                     <View className="w-full h-full items-center justify-center">

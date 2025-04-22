@@ -1,11 +1,3 @@
-import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack, useSegments, useRouter } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-import "../global.css";
 
 // Suppress react-native-render-html defaultProps warnings
 const originalConsoleError = console.error;
@@ -22,6 +14,15 @@ console.error = (...args) => {
   }
   originalConsoleError.apply(console, args);
 };
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { Stack, useSegments, useRouter } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import 'react-native-reanimated';
+import "../global.css";
+
 
 
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
@@ -65,23 +66,29 @@ function RootLayoutNav() {
   // Effect to handle navigation based on auth state
   useEffect(() => {
     if (isLoading) return;
-
-    const inAuthGroup = segments[0] === '(auth)';
+  
     const inTabsGroup = segments[0] === '(tabs)';
-    const isWorkshopRoute = segments[0] === 'workshop'; // Add this check
+    const isWorkshopRoute = segments[0] === 'workshop';
+    const isSignInRoute = segments[0] === 'sign-in';
     
     // Allow workshop routes for authenticated users
-    if (isAuthenticated && !inTabsGroup && !isWorkshopRoute) {
-      router.replace('/(tabs)');
-    } else if (!isAuthenticated && !segments[0]?.includes('sign-in')) {
-      router.replace('/sign-in');
+    if (isAuthenticated) {
+      // If user is authenticated and not in tabs or workshop route, redirect to tabs
+      if (!inTabsGroup && !isWorkshopRoute) {
+        router.replace('/(tabs)');
+      }
+    } else {
+      // If user is not authenticated and not on sign-in page, redirect to sign-in
+      if (!isSignInRoute) {
+        router.replace('/sign-in');
+      }
     }
-  }, [isAuthenticated, segments, isLoading]);
+  }, [isAuthenticated, segments, isLoading, router]);
 
   return (
     <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="sign-in" options={{ headerShown: true }} />
+        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen 
           name="workshop/[id]" 

@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import React, { useState, useRef, useEffect } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
@@ -13,7 +14,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const [isQRCodeVisible, setIsQRCodeVisible] = useState(false);
   const insets = useSafeAreaInsets();
-  
+
   // Create a ref to track if the component is mounted
   const isMounted = useRef(false);
   useEffect(() => {
@@ -24,7 +25,7 @@ export default function TabLayout() {
   }, []);
 
   // Custom tab bar using Tailwind (NativeWind) classes
-  function CustomTabBar({ state, descriptors, navigation }) {
+  function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     return (
       <View
         className="absolute bottom-0 left-0 right-0"
@@ -37,7 +38,6 @@ export default function TabLayout() {
             const isFocused = state.index === index;
 
             // Skip the QR code route from the normal tab list, BUT ONLY if it exists
-            // This was causing an issue where any tab might be treated as "qrcode"
             if (route.name === 'qrcode') return null;
 
             const onPress = () => {
@@ -47,8 +47,7 @@ export default function TabLayout() {
                 canPreventDefault: true,
               });
               if (!isFocused && !event.defaultPrevented) {
-                // The `merge: true` option makes sure that the params inside the tab screen are preserved
-                navigation.navigate({ name: route.name, merge: true });
+                navigation.navigate({ name: route.name, merge: true } as any);
               }
             };
 
@@ -92,7 +91,6 @@ export default function TabLayout() {
               backgroundColor: Colors[colorScheme ?? 'light'].tint,
             }}
             onPress={() => {
-              // Only update state if component is still mounted
               if (isMounted.current) {
                 setIsQRCodeVisible(true);
               }

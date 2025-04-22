@@ -5,6 +5,8 @@ import RenderHTML from 'react-native-render-html';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native'; // For focus refresh
 
+import { BASE_IMAGE_URL } from '@/constants/Config';
+
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -33,8 +35,6 @@ interface Workshop {
   created_at: string;
   updated_at: string;
 }
-
-const BASE_IMAGE_URL = 'http://192.168.10.160:8000/storage/';
 
 export default function WorkshopDetailsScreen() {
   const { id: workshopId } = useLocalSearchParams<{ id: string }>();
@@ -76,7 +76,7 @@ export default function WorkshopDetailsScreen() {
 
       const workshopsArray = Array.isArray(allWorkshops) ? allWorkshops : [];
       const currentWorkshop = workshopsArray.find((w: Workshop) => w.workshop_id === workshopId) ?? null;
-      console.log("Current Workshop:", currentWorkshop);
+
       setWorkshop(currentWorkshop);
 
       if (currentWorkshop) {
@@ -294,9 +294,9 @@ export default function WorkshopDetailsScreen() {
         <View className={`w-full aspect-[16/9] ${isDark ? 'bg-gray-700' : 'bg-gray-200'} mb-4`}>
           {workshop.image_url ? (
             <Image
-              source={{ uri: `${BASE_IMAGE_URL}${workshop.image_url}` }}
+              source={{ uri: `${BASE_IMAGE_URL}/images/${workshop.image_url}` }}
               className="w-full h-full"
-              resizeMode="cover"
+              resizeMode="contain"
             />
           ) : (
             <View className="w-full h-full items-center justify-center">
@@ -336,12 +336,12 @@ export default function WorkshopDetailsScreen() {
 
           {/* Description */}
           <ThemedText type="subtitle" className="mb-2">Details</ThemedText>
-          <View className="mb-4">
+          <View className="mb-20">
             <RenderHTML
               contentWidth={width - 32} // Screen width - horizontal padding
               source={{ html: workshop.description }}
               tagsStyles={{
-                 p: { color: baseTextColor, fontSize: 15, lineHeight: 22, marginBottom: 12 },
+                 p: { color: baseTextColor, fontSize: 15, lineHeight: 22, marginBottom: 5 },
                  strong: { color: strongTextColor, fontWeight: 'bold' },
                  ul: { color: baseTextColor, marginVertical: 8, marginLeft: 10 },
                  li: { color: baseTextColor, fontSize: 15, lineHeight: 22, marginBottom: 6 },
