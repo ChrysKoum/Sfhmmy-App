@@ -9,8 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function SignInScreen() {
-  const [email, setEmail] = useState('chyrkoum@gmail.com'); // chyrkoum@gmail.com
-  const [password, setPassword] = useState('12345678'); // 12345678
+  const [email, setEmail] = useState(''); // chyrkoum@gmail.com
+  const [password, setPassword] = useState(''); // 12345678 
   const { signIn, isLoading, error } = useAuth();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
