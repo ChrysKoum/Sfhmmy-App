@@ -66,7 +66,7 @@ async function loginAPI(email: string, password: string): Promise<{ token: strin
     });
 
     const data = await response.json();
-    console.log('Login response:', data); // Log the response for debugging
+    // console.log('Login response:', data); // Log the response for debugging
     if (!response.ok) {
       // Improved error handling
       const errorMessage = data.message || `Authentication failed with status: ${response.status}`;

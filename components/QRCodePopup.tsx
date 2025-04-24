@@ -69,7 +69,7 @@ export function QRCodePopup({ visible, onClose, title }: QRCodePopupProps) {
           className="flex-1 justify-center items-center" 
           onPress={onClose}
         >
-          <Animated.View 
+          <Animated.View
             style={[
               {
                 width: width * 0.85,
@@ -87,36 +87,61 @@ export function QRCodePopup({ visible, onClose, title }: QRCodePopupProps) {
             ]}
             className="p-6 rounded-xl items-center shadow-md"
           >
-            <Pressable 
-              className="absolute top-[-20] right-[-20] z-10" 
+            <Pressable
+              className="absolute top-[-20] right-[-20] z-10"
               onPress={onClose}
             >
-              <View className="w-10 h-10 rounded-full bg-gray-200 justify-center items-center shadow">
-                <ThemedText className="text-base">✕</ThemedText>
+              <View
+                className="w-10 h-10 rounded-full justify-center items-center shadow"
+                style={{
+                  backgroundColor: isDark ? '#33383d' : '#e5e7eb',
+                }}
+              >
+                <ThemedText
+                  className="text-xl font-bold"
+                  style={{
+                    color: isDark ? '#fff' : '#222',
+                  }}
+                >
+                  ✕
+                </ThemedText>
               </View>
             </Pressable>
-            
+
             <ThemedText type="title" className="mt-2.5 mb-6">{title}</ThemedText>
-            
-            <View className="w-[250px] h-[250px] p-4 bg-white rounded-xl mb-6 shadow justify-center items-center">
+
+            <View
+              className="mb-6 justify-center items-center"
+              style={{
+                backgroundColor: isDark ? '#f3f4f6' : '#f3f4f6',
+                borderRadius: 24,
+                padding: 16,
+                margin: 8,
+                shadowColor: '#000',
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 4,
+              }}
+            >
               {loading ? (
                 <ActivityIndicator size="large" color="#297fff" />
               ) : qrCodeUrl ? (
-                <Image 
-                  source={{ uri: qrCodeUrl }} 
-                  className="w-[250px] h-[250px]"
+                <Image
+                  source={{ uri: qrCodeUrl }}
+                  className="w-[210px] h-[210px]"
                   resizeMode="contain"
+                  style={{ backgroundColor: isDark ? '#fff' : '#fff' }}
                 />
               ) : (
                 <QRCode
-                  size={250}
+                  size={210}
                   color="#000"
                   backgroundColor="#fff"
                   logoBackgroundColor="#fff"
                 />
               )}
             </View>
-            
+
             <ThemedText className="text-center mb-4 opacity-70">
               Present this QR code at the registration desk and workshop sessions
             </ThemedText>

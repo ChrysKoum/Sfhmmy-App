@@ -222,60 +222,90 @@ const AgendaScreen: FC = () => {
           transparent
           onRequestClose={() => setFilterModalVisible(false)}
         >
-          <View className="flex-1 justify-center items-center bg-black/60">
-            <View className={`${isDark ? 'bg-gray-900' : 'bg-white '} rounded-xl p-6 w-11/12 max-w-xl`}>
-              <ThemedText type="subtitle" className="mb-4 text-center">Filter by Place</ThemedText>
-              {places.length === 0 && (
-                <ThemedText className="text-center mb-4">No places available for this day.</ThemedText>
-              )}
-              {places.map(place => (
+          <Pressable
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }}
+            onPress={() => setFilterModalVisible(false)}
+          >
+            <Pressable
+              style={{ width: '91.666667%', maxWidth: 400 }}
+              onPress={e => e.stopPropagation()}
+            >
+              <View className={`${isDark ? 'bg-gray-900' : 'bg-white '} rounded-xl p-6`}>
+                {/* Close Button */}
                 <Pressable
-                  key={place}
-                  className={`py-2 px-4 rounded-lg mb-2 ${selectedPlace === place ? 'bg-blue-500' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
-                  onPress={() => {
-                    setSelectedPlace(place);
-                    setSelectedRoom(null);
-                  }}
-                >
-                  <ThemedText className={`text-base ${selectedPlace === place ? 'text-white' : ''}`}>{place}</ThemedText>
-                </Pressable>
-              ))}
-              {selectedPlace && (
-                <>
-                  <ThemedText type="subtitle" className="mt-4 mb-2 text-center">Filter by Room</ThemedText>
-                  {rooms.length === 0 && (
-                    <ThemedText className="text-center mb-4">No rooms available for this place.</ThemedText>
-                  )}
-                  {rooms.map(room => (
-                    <Pressable
-                      key={room}
-                      className={`py-2 px-4 rounded-lg mb-2 ${selectedRoom === room ? 'bg-blue-500' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
-                      onPress={() => setSelectedRoom(room)}
-                    >
-                      <ThemedText className={`text-base ${selectedRoom === room ? 'text-white' : ''}`}>{room}</ThemedText>
-                    </Pressable>
-                  ))}
-                </>
-              )}
-              <View className="flex-row justify-between mt-6">
-                <TouchableOpacity
-                  className="px-4 py-2 bg-gray-400 rounded-lg"
-                  onPress={() => {
-                    setSelectedPlace(null);
-                    setSelectedRoom(null);
-                  }}
-                >
-                  <ThemedText className="text-white font-semibold">Clear</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="px-4 py-2 bg-blue-500 rounded-lg"
                   onPress={() => setFilterModalVisible(false)}
+                  style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}
+                  hitSlop={12}
                 >
-                  <ThemedText className="text-white font-semibold">Apply</ThemedText>
-                </TouchableOpacity>
+                  <View
+                    className="w-10 h-10 rounded-full justify-center items-center shadow"
+                    style={{
+                      backgroundColor: isDark ? '#33383d' : '#e5e7eb',
+                    }}
+                  >
+                    <ThemedText
+                      className="text-xl font-bold"
+                      style={{
+                        color: isDark ? '#fff' : '#222',
+                      }}
+                    >
+                      ×
+                    </ThemedText>
+                  </View>
+                </Pressable>
+                <ThemedText type="subtitle" className="mb-4 text-center">Filter by Place</ThemedText>
+                {places.length === 0 && (
+                  <ThemedText className="text-center mb-4">No places available for this day.</ThemedText>
+                )}
+                {places.map(place => (
+                  <Pressable
+                    key={place}
+                    className={`py-2 px-4 rounded-lg mb-2 ${selectedPlace === place ? 'bg-blue-500' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
+                    onPress={() => {
+                      setSelectedPlace(place);
+                      setSelectedRoom(null);
+                    }}
+                  >
+                    <ThemedText className={`text-base ${selectedPlace === place ? 'text-white' : ''}`}>{place}</ThemedText>
+                  </Pressable>
+                ))}
+                {selectedPlace && (
+                  <>
+                    <ThemedText type="subtitle" className="mt-4 mb-2 text-center">Filter by Room</ThemedText>
+                    {rooms.length === 0 && (
+                      <ThemedText className="text-center mb-4">No rooms available for this place.</ThemedText>
+                    )}
+                    {rooms.map(room => (
+                      <Pressable
+                        key={room}
+                        className={`py-2 px-4 rounded-lg mb-2 ${selectedRoom === room ? 'bg-blue-500' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
+                        onPress={() => setSelectedRoom(room)}
+                      >
+                        <ThemedText className={`text-base ${selectedRoom === room ? 'text-white' : ''}`}>{room}</ThemedText>
+                      </Pressable>
+                    ))}
+                  </>
+                )}
+                <View className="flex-row justify-between mt-6">
+                  <TouchableOpacity
+                    className="px-4 py-2 bg-gray-400 rounded-lg"
+                    onPress={() => {
+                      setSelectedPlace(null);
+                      setSelectedRoom(null);
+                    }}
+                  >
+                    <ThemedText className="text-white font-semibold">Clear</ThemedText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="px-4 py-2 bg-blue-500 rounded-lg"
+                    onPress={() => setFilterModalVisible(false)}
+                  >
+                    <ThemedText className="text-white font-semibold">Apply</ThemedText>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </View>
+            </Pressable>
+          </Pressable>
         </Modal>
 
         {/* Agenda list */}
@@ -285,36 +315,48 @@ const AgendaScreen: FC = () => {
           showsVerticalScrollIndicator={false}
         >
           {activeDay &&
-            filteredEvents.map((item, index) => {
-              const eventColor = getEventColor(item.type);
-              return (
-                <ThemedView
-                  key={`${item.name}-${index}`}
-                  className="p-4 mb-3 rounded-lg border-l-4 shadow-sm"
-                  style={{ borderLeftColor: eventColor }}
-                >
-                  <ThemedText className="text-sm opacity-70 mb-2">
-                    {item.time}
-                  </ThemedText>
-                  <ThemedText type="defaultSemiBold">
-                    {item.name}
-                  </ThemedText>
-                  <ThemedText className="text-xs mt-1 opacity-80">
-                    {item.place} — {item.room}
-                  </ThemedText>
-                  <View
-                    className="self-start px-2.5 py-1 rounded mt-2"
-                    style={{ backgroundColor: eventColor }}
-                  >
-                    <ThemedText
-                      className="text-white text-xs font-semibold"
+            (() => {
+              let lastPlace: string | null = null;
+              return filteredEvents.map((item, index) => {
+                const eventColor = getEventColor(item.type);
+                const showPlaceTitle = item.place !== lastPlace;
+                lastPlace = item.place;
+                return (
+                  <React.Fragment key={`${item.name}-${index}`}>
+                    {showPlaceTitle && (
+                      <ThemedText className={`text-lg font-bold mt-6 mb-3 ${isDark ? "text-blue-600" : "text-blue-300"}`}>
+                        {item.place}
+                      </ThemedText>
+                    )}
+                    <ThemedView
+                      className="p-4 mb-3 rounded-lg border-l-4 shadow-sm"
+                      style={{ borderLeftColor: eventColor }}
                     >
-                      {item.type}
-                    </ThemedText>
-                  </View>
-                </ThemedView>
-              );
-            })}
+                      <ThemedText className="text-sm opacity-70 mb-2">
+                        {item.time}
+                      </ThemedText>
+                      <ThemedText type="defaultSemiBold">
+                        {item.name}
+                      </ThemedText>
+                      <ThemedText className="text-xs mt-1 opacity-80">
+                        {item.place} — {item.room}
+                      </ThemedText>
+                      <View
+                        className="self-start px-2.5 py-1 rounded mt-2"
+                        style={{ backgroundColor: eventColor }}
+                      >
+                        <ThemedText
+                          className="text-white text-xs font-semibold"
+                        >
+                          {item.type}
+                        </ThemedText>
+                      </View>
+                    </ThemedView>
+                  </React.Fragment>
+                );
+              });
+            })()
+          }
         </ScrollView>
       </ThemedView>
     </SafeAreaView>
