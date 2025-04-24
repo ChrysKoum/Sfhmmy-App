@@ -1,10 +1,7 @@
 import React from 'react';
-import { Modal, Pressable, View, Dimensions, Animated, Image, ActivityIndicator } from 'react-native';
+import { Modal, Pressable, View, Dimensions, Image, ActivityIndicator } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { BlurView } from 'expo-blur';
-
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -20,21 +17,14 @@ export function QRCodePopup({ visible, onClose, title }: QRCodePopupProps) {
   const { getQrCodeData } = useAuth();
   const [qrCodeUrl, setQrCodeUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
-  
-  // Animation for modal appearance
-  const [animation] = React.useState(new Animated.Value(0));
-  
-  React.useEffect(() => {
-    Animated.timing(animation, {
-      toValue: visible ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
 
-    // Fetch QR code from API when modal is visible
+  const { width } = Dimensions.get('window');
+
+  React.useEffect(() => {
     if (visible) {
       fetchQrCode();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const fetchQrCode = async () => {
@@ -43,112 +33,126 @@ export function QRCodePopup({ visible, onClose, title }: QRCodePopupProps) {
       const qrUrl = await getQrCodeData();
       if (qrUrl) {
         setQrCodeUrl(qrUrl);
+      } else {
+        setQrCodeUrl(null);
       }
     } catch (error) {
-      console.error('Error loading QR code:', error);
+      setQrCodeUrl(null);
     } finally {
       setLoading(false);
     }
   };
-  
-  const { width } = Dimensions.get('window');
-  
+
   return (
     <Modal
-      animationType="none"
-      transparent={true}
+      animationType="fade"
+      transparent
       visible={visible}
       onRequestClose={onClose}
     >
-      <BlurView 
-        tint={isDark ? 'dark' : 'light'}
-        intensity={20} 
-        className="flex-1 justify-center items-center"
+      <Pressable
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(0,0,0,0.6)',
+        }}
+        onPress={onClose}
       >
-        <Pressable 
-          className="flex-1 justify-center items-center" 
-          onPress={onClose}
+        <Pressable
+          style={{
+            width: width * 0.85,
+            maxWidth: 400,
+            borderRadius: 20,
+            backgroundColor: isDark ? '#1c1c1e' : '#fff',
+            padding: 24,
+            alignItems: 'center',
+            position: 'relative',
+          }}
+          onPress={e => e.stopPropagation()}
         >
-          <Animated.View
-            style={[
-              {
-                width: width * 0.85,
-                backgroundColor: isDark ? '#1c1c1e' : 'white',
-                opacity: animation,
-                transform: [
-                  {
-                    scale: animation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.9, 1],
-                    }),
-                  },
-                ],
-              }
-            ]}
-            className="p-6 rounded-xl items-center shadow-md"
+          {/* Close Button */}
+          <Pressable
+            onPress={onClose}
+            style={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              zIndex: 10,
+            }}
+            hitSlop={12}
           >
-            <Pressable
-              className="absolute top-[-20] right-[-20] z-10"
-              onPress={onClose}
-            >
-              <View
-                className="w-10 h-10 rounded-full justify-center items-center shadow"
-                style={{
-                  backgroundColor: isDark ? '#33383d' : '#e5e7eb',
-                }}
-              >
-                <ThemedText
-                  className="text-xl font-bold"
-                  style={{
-                    color: isDark ? '#fff' : '#222',
-                  }}
-                >
-                  ✕
-                </ThemedText>
-              </View>
-            </Pressable>
-
-            <ThemedText type="title" className="mt-2.5 mb-6">{title}</ThemedText>
-
             <View
-              className="mb-6 justify-center items-center"
               style={{
-                backgroundColor: isDark ? '#f3f4f6' : '#f3f4f6',
-                borderRadius: 24,
-                padding: 16,
-                margin: 8,
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: isDark ? '#33383d' : '#e5e7eb',
+                justifyContent: 'center',
+                alignItems: 'center',
                 shadowColor: '#000',
                 shadowOpacity: 0.1,
-                shadowRadius: 8,
+                shadowRadius: 4,
                 elevation: 4,
               }}
             >
-              {loading ? (
-                <ActivityIndicator size="large" color="#297fff" />
-              ) : qrCodeUrl ? (
-                <Image
-                  source={{ uri: qrCodeUrl }}
-                  className="w-[210px] h-[210px]"
-                  resizeMode="contain"
-                  style={{ backgroundColor: isDark ? '#fff' : '#fff' }}
-                />
-              ) : (
-                <QRCode
-                  size={210}
-                  color="#000"
-                  backgroundColor="#fff"
-                  logoBackgroundColor="#fff"
-                />
-              )}
+              <ThemedText
+                style={{
+                  color: isDark ? '#fff' : '#222',
+                  fontSize: 22,
+                  fontWeight: 'bold',
+                }}
+              >
+                ×
+              </ThemedText>
             </View>
+          </Pressable>
 
-            <ThemedText className="text-center mb-4 opacity-70">
-              Present this QR code at the registration desk and workshop sessions
-            </ThemedText>
-          
-          </Animated.View>
+          <ThemedText type="title" className="mt-2.5 mb-6">{title}</ThemedText>
+
+          <View
+            style={{
+              backgroundColor: isDark ? '#f3f4f6' : '#f3f4f6',
+              borderRadius: 24,
+              padding: 16,
+              margin: 8,
+              shadowColor: '#000',
+              shadowOpacity: 0.1,
+              shadowRadius: 8,
+              elevation: 4,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {loading ? (
+              <ActivityIndicator size="large" color="#297fff" />
+            ) : qrCodeUrl ? (
+              <Image
+                source={{ uri: qrCodeUrl }}
+                style={{
+                  width: 210,
+                  height: 210,
+                  borderRadius: 16,
+                  backgroundColor: '#fff',
+                }}
+                resizeMode="contain"
+              />
+            ) : (
+              <QRCode
+                size={210}
+                color="#000"
+                backgroundColor="#fff"
+                logoBackgroundColor="#fff"
+                value="No QR code"
+              />
+            )}
+          </View>
+
+          <ThemedText className="text-center mb-4 opacity-70">
+            Present this QR code at the registration desk and workshop sessions
+          </ThemedText>
         </Pressable>
-      </BlurView>
+      </Pressable>
     </Modal>
   );
 }
