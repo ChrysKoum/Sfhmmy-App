@@ -91,8 +91,11 @@ export default function TabLayout() {
               backgroundColor: Colors[colorScheme ?? 'light'].tint,
             }}
             onPress={() => {
-              if (isMounted.current) {
-                setIsQRCodeVisible(true);
+              // Navigate to the QR code screen/tab
+              // Find the navigation prop from the parent scope
+              // You can get it from the arguments of CustomTabBar
+              if (typeof navigation?.navigate === 'function') {
+                navigation.navigate('qrcode');
               }
             }}
           >
@@ -100,16 +103,6 @@ export default function TabLayout() {
           </TouchableOpacity>
         </View>
 
-        {/* QR Code Popup */}
-        <QRCodePopup
-          visible={isQRCodeVisible}
-          onClose={() => {
-            if (isMounted.current) {
-              setIsQRCodeVisible(false);
-            }
-          }}
-          title="My Conference Badge"
-        />
       </View>
     );
   }
@@ -139,7 +132,15 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* Make sure this tab exists in your file structure */}
+      <Tabs.Screen
+        name="qrcode"
+        options={{
+          title: 'QR Code',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="qrcode" color={color} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="workshops"
         options={{

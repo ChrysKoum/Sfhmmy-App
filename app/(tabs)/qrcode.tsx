@@ -74,7 +74,6 @@ export default function QRCodeScreen() {
                 style={{
                   width: 210,
                   height: 210,
-                  borderRadius: 16,
                   backgroundColor: '#fff',
                 }}
                 resizeMode="contain"
