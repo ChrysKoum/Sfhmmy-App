@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -8,21 +8,10 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { QRCodePopup } from '@/components/QRCodePopup';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const [isQRCodeVisible, setIsQRCodeVisible] = useState(false);
   const insets = useSafeAreaInsets();
-
-  // Create a ref to track if the component is mounted
-  const isMounted = useRef(false);
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
 
   // Custom tab bar using Tailwind (NativeWind) classes
   function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -36,9 +25,6 @@ export default function TabLayout() {
           {state.routes.map((route, index) => {
             const { options } = descriptors[route.key];
             const isFocused = state.index === index;
-
-            // Skip the QR code route from the normal tab list, BUT ONLY if it exists
-            if (route.name === 'qrcode') return null;
 
             const onPress = () => {
               const event = navigation.emit({
@@ -82,27 +68,6 @@ export default function TabLayout() {
             );
           })}
         </View>
-
-        {/* Special center QR button wrapped in its own container */}
-        <View className="absolute bottom-[30px] left-0 right-0 items-center">
-          <TouchableOpacity
-            className="w-[56px] h-[56px] rounded-full justify-center items-center shadow-lg"
-            style={{
-              backgroundColor: Colors[colorScheme ?? 'light'].tint,
-            }}
-            onPress={() => {
-              // Navigate to the QR code screen/tab
-              // Find the navigation prop from the parent scope
-              // You can get it from the arguments of CustomTabBar
-              if (typeof navigation?.navigate === 'function') {
-                navigation.navigate('qrcode');
-              }
-            }}
-          >
-            <IconSymbol size={28} name="qrcode" color="white" />
-          </TouchableOpacity>
-        </View>
-
       </View>
     );
   }

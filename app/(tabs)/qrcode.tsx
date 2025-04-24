@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Image, Dimensions, ScrollView } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/ThemedText';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -79,12 +78,15 @@ export default function QRCodeScreen() {
                 resizeMode="contain"
               />
             ) : (
-              <QRCode
-                size={210}
-                color="#000"
-                backgroundColor="#fff"
-                logoBackgroundColor="#fff"
-                value="No QR code"
+              <Image
+                source={require('@/assets/images/logo/sfhmmy_logo_white.png')}
+                style={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: 16,
+                  backgroundColor: '#fff',
+                }}
+                resizeMode="contain"
               />
             )}
           </View>
