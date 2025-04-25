@@ -2,9 +2,9 @@
   "expo": {
     "name": "sfhmmy-app",
     "slug": "sfhmmy-app",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
-    "icon": "./assets/images/logo/sfhmmy_logo_dark.png",
+    "icon": "./assets/images/logo/sfhmmy_logo_dark_sq.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

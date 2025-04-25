@@ -99,7 +99,7 @@ const Footer = () => {
         <View className={`h-px ${isDark ? 'bg-gray-800' : 'bg-gray-300'} w-full my-6`} />
 
         {/* Privacy Policy Link */}
-        <TouchableOpacity onPress={() => openLink("https://drive.google.com/file/d/1mHXEyWWt3NIpDnhvcAUwqMR8Xq_eDJv5/view")}>
+        <TouchableOpacity onPress={() => openLink("https://drive.google.com/file/d/14a8KE3RrNGiEVHVxi1E-LLvfRTIm9KmV/view")}>
           <Text className="text-blue-500 underline text-center">
             Πολιτική απορρήτου
           </Text>
