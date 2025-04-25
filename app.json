@@ -13,7 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo/sfhmmy_logo_dark.png",
+        "foregroundImage": "./assets/images/logo/sfhmmy_logo_dark_icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.ssfragou.sfhmmyapp"
@@ -40,8 +40,11 @@
       "typedRoutes": true
     },
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "efb6126c-0413-4eea-9a8e-4736fdb9d2be"
+        "projectId": "8d0a550a-6c89-4a49-84b9-0a8fb9a02b36"
       },
       "author": "Chrysostomos Koumides"
     }
